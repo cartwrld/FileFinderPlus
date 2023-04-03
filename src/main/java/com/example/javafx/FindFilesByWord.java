@@ -45,7 +45,6 @@ public class FindFilesByWord extends Application
 	private List<Menu> mList;
 
 
-
 	@Override
 	public void start(Stage stage)
 	{
@@ -79,8 +78,6 @@ public class FindFilesByWord extends Application
 		stage.show();
 
 	}
-
-
 
 
 	public HBox getLeftImg()
@@ -130,6 +127,7 @@ public class FindFilesByWord extends Application
 		writeFoundFiles(foundFiles, foundDir, sf);
 
 	}
+
 	public void getFoundFiles(File[] allFiles, SearchFile sf) throws FileNotFoundException
 	{
 		foundFiles = new File[0];
@@ -155,7 +153,8 @@ public class FindFilesByWord extends Application
 								break;
 							}
 						}
-						if (b) {
+						if (b)
+						{
 							break;
 						}
 
@@ -164,6 +163,7 @@ public class FindFilesByWord extends Application
 			}
 		}
 	}
+
 	public File[] push(File[] array, File file)
 	{
 		File[] retArr = new File[array.length + 1];
@@ -205,9 +205,6 @@ public class FindFilesByWord extends Application
 	}
 
 
-
-
-
 	public void setButtons()
 	{
 		cmdBrowse.setOnAction(e ->
@@ -222,7 +219,8 @@ public class FindFilesByWord extends Application
 			if (txtSearch.getText().contains(","))
 			{
 				criteria = txtSearch.getText().split(",");
-			} else {
+			} else
+			{
 				criteria = new String[1];
 				criteria[0] = txtSearch.getText();
 			}
@@ -234,8 +232,7 @@ public class FindFilesByWord extends Application
 			try
 			{
 				findFiles(sf);
-			}
-			catch (IOException ex)
+			} catch (IOException ex)
 			{
 				throw new RuntimeException(ex);
 			}
@@ -270,15 +267,15 @@ public class FindFilesByWord extends Application
 							spFiles.setPrefWidth(inc2.getAndUpdate());
 							wpIV.setFitWidth(inc.getAndDec());
 
-						}
-						catch (Exception ex)
+						} catch (Exception ex)
 						{
 							throw new RuntimeException(ex);
 						}
 					}
 
 
-					lvFiles.getSelectionModel().selectedItemProperty().addListener(event -> {
+					lvFiles.getSelectionModel().selectedItemProperty().addListener(event ->
+					{
 
 						FileChooser obOpen = new FileChooser();
 
@@ -305,7 +302,7 @@ public class FindFilesByWord extends Application
 
 							taFile.setFont(Font.font("Consolas", FontWeight.NORMAL, FontPosture.REGULAR, 16));
 
-							Scene txtScene = new Scene(txtPane,900,1100);
+							Scene txtScene = new Scene(txtPane, 900, 1100);
 
 							txtStage.setScene(txtScene);
 							txtStage.show();
@@ -327,7 +324,6 @@ public class FindFilesByWord extends Application
 
 
 	}
-
 
 
 	public void setFontStyle()
@@ -432,7 +428,6 @@ public class FindFilesByWord extends Application
 	}
 
 
-
 	public MenuBar estMenuBar()
 	{
 		mList = new ArrayList<>();
@@ -450,92 +445,6 @@ public class FindFilesByWord extends Application
 //		}
 
 		return obBar;
-	}
-	public Menu getEdit()
-	{
-		Menu mnEdit = new Menu("Edit");
-		Menu mnBack = new Menu("Background Color");
-		MenuItem miSelect = new MenuItem("Select");
-		MenuItem miRandom = new MenuItem("Random");
-
-		mnBack.getItems().addAll(miSelect, miRandom);
-		mnEdit.getItems().add(mnBack);
-
-		miSelect.setOnAction(e -> {
-			setBG();
-
-		});
-		miRandom.setOnAction(e -> {
-
-			new Thread(() -> {
-				while (true)
-				{
-					double r = Math.random() * 1;
-					double g = Math.random() * 1;
-					double b = Math.random() * 1;
-
-					System.out.printf("rgb(%.2f,%.2f,%.2f)", r, g, b);
-
-					Color obColor = new Color(r, g, b, 1);
-
-					String sRGB = String.format("rgb(%.0f,%.0f,%.0f)", (r * 255), (g * 255), (b * 255));
-					//
-					System.out.println(sRGB);
-
-
-
-
-					Platform.runLater(() -> {
-						centerBox.setStyle("-fx-control-inner-background:" + sRGB);
-					});
-
-					try
-					{
-						Thread.sleep(1000);
-					}
-					catch (InterruptedException e1)
-					{
-						e1.printStackTrace();
-					}
-				}
-
-			}).start();
-
-		});
-
-		mList.add(mnEdit);
-		mnEdit.getStyleClass().add("menuStyle.css");
-		return mnEdit;
-	}
-
-	/**
-	 * This routine will use a color picker to go ahead and select a background
-	 * color for our TextArea. A color picker will give us a dialog box that we can
-	 * use to select from a list of colors.
-	 */
-	public void setBG()
-	{
-		ColorPicker obPicker = new ColorPicker();
-		HBox obBox = new HBox(obPicker);
-		obBox.setAlignment(Pos.CENTER);
-
-		bp.setCenter(obBox);
-
-		obPicker.setOnAction(e -> {
-			Color obColor = obPicker.getValue();
-
-			System.out.printf("%.2f,%.2f,%.2f", obColor.getRed(), obColor.getGreen(), obColor.getBlue());
-
-			// The way we set the color for a TextArea is to use the following:
-			//// fx-control-inner-background
-			// we are going to build up an RGB string to represent this color
-
-			String sRGB = String.format("rgb(%d,%d,%d)", ((int) obColor.getRed() * 255),
-					((int) obColor.getGreen() * 255), ((int) obColor.getBlue() * 255));
-			centerBox.setStyle("-fx-control-inner-background:" + sRGB);
-			bp.setCenter(centerBox);
-
-		});
 	}
 
 	/**
@@ -562,9 +471,97 @@ public class FindFilesByWord extends Application
 		miExit.setOnAction(e -> System.exit(0));
 
 		mList.add(mnFile);
-		mnFile.getStyleClass().add("menuStyle.css");
 		return mnFile;
 	}
+
+	public Menu getEdit()
+	{
+		Menu mnEdit = new Menu("Edit");
+		Menu mnBack = new Menu("Background Color");
+		MenuItem miSelect = new MenuItem("Select");
+		MenuItem miRandom = new MenuItem("Random");
+
+		mnBack.getItems().addAll(miSelect, miRandom);
+		mnEdit.getItems().add(mnBack);
+
+		miSelect.setOnAction(e ->
+		{
+//			setBG();
+
+		});
+		miRandom.setOnAction(e ->
+		{
+//
+//			new Thread(() -> {
+//				while (true)
+//				{
+//					double r = Math.random() * 1;
+//					double g = Math.random() * 1;
+//					double b = Math.random() * 1;
+//
+//					System.out.printf("rgb(%.2f,%.2f,%.2f)", r, g, b);
+//
+//					Color obColor = new Color(r, g, b, 1);
+//
+//					String sRGB = String.format("rgb(%.0f,%.0f,%.0f)", (r * 255), (g * 255), (b * 255));
+//					//
+//					System.out.println(sRGB);
+//
+//
+//
+//
+//					Platform.runLater(() -> {
+//						centerBox.setStyle("-fx-control-inner-background:" + sRGB);
+//					});
+//
+//					try
+//					{
+//						Thread.sleep(1000);
+//					}
+//					catch (InterruptedException e1)
+//					{
+//						e1.printStackTrace();
+//					}
+//				}
+//
+//			}).start();
+
+		});
+
+		mList.add(mnEdit);
+		return mnEdit;
+	}
+
+//	/**
+//	 * This routine will use a color picker to go ahead and select a background
+//	 * color for our TextArea. A color picker will give us a dialog box that we can
+//	 * use to select from a list of colors.
+//	 */
+//	public void setBG()
+//	{
+//		ColorPicker obPicker = new ColorPicker();
+//		HBox obBox = new HBox(obPicker);
+//		obBox.setAlignment(Pos.CENTER);
+//
+//		bp.setCenter(obBox);
+//
+//		obPicker.setOnAction(e -> {
+//			Color obColor = obPicker.getValue();
+//
+//			System.out.printf("%.2f,%.2f,%.2f", obColor.getRed(), obColor.getGreen(), obColor.getBlue());
+//
+//			// The way we set the color for a TextArea is to use the following:
+//			//// fx-control-inner-background
+//			// we are going to build up an RGB string to represent this color
+//
+//			String sRGB = String.format("rgb(%.2f,%.2f,%.2f)",
+//					obColor.getRed() * 255, obColor.getGreen() * 255,  obColor.getBlue() * 255);
+//			.setStyle("-fx-control-inner-background:" + sRGB);
+//			bp.setCenter(getCenter());
+//
+//		});
+//	}
+
 
 //	public void dealWithSave()
 //	{
@@ -590,38 +587,38 @@ public class FindFilesByWord extends Application
 //		}
 //
 //
-
-	/**
-	 * This will introduce us to the notion of working with OpenFile dialogs that
-	 * are used to indicate which files to open for processing.
-	 *
-	 * @throws FileNotFoundException
-	 * @throws
-	 */
-	public void dealWithOpen()
-	{
-		FileChooser obOpen = new FileChooser();
-
-		obOpen.setTitle("Open File for Processing");
-		obOpen.setInitialDirectory(new File("D:/TestArea"));
-
-		// Normally open dialogs will restrict themselves initially only to a certain
-		// type of file
-		obOpen.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("txt files", "*.txt"),
-				new FileChooser.ExtensionFilter("All Files", "*.*"));
-
-		// creating the file that the user chooses
-		File obFile = obOpen.showOpenDialog(stage);
-
-		if (obFile != null)
-		{
-
 //
-//			centerBox.setText(getContents(obFile));
-
-		}
-
-	}
+//	/**
+//	 * This will introduce us to the notion of working with OpenFile dialogs that
+//	 * are used to indicate which files to open for processing.
+//	 *
+//	 * @throws FileNotFoundException
+//	 * @throws
+//	 */
+//	public void dealWithOpen()
+//	{
+//		FileChooser obOpen = new FileChooser();
+//
+//		obOpen.setTitle("Open File for Processing");
+//		obOpen.setInitialDirectory(new File("D:/TestArea"));
+//
+//		// Normally open dialogs will restrict themselves initially only to a certain
+//		// type of file
+//		obOpen.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("txt files", "*.txt"),
+//				new FileChooser.ExtensionFilter("All Files", "*.*"));
+//
+//		// creating the file that the user chooses
+//		File obFile = obOpen.showOpenDialog(stage);
+//
+//		if (obFile != null)
+//		{
+//
+////
+////			centerBox.setText(getContents(obFile));
+//
+//		}
+//
+//	}
 
 	public String getContents(File obFile)
 	{
@@ -630,9 +627,10 @@ public class FindFilesByWord extends Application
 
 		try (Scanner obIn = new Scanner(obFile))
 		{
+			int lc = 0;
 			while (obIn.hasNextLine())
 			{
-				str += obIn.nextLine() + "\n";
+				str += lc++ + "\t" + obIn.nextLine().replaceAll("\t", "\s\s\s") + "\n";
 			}
 			return str;
 		} catch (FileNotFoundException e)
@@ -650,7 +648,8 @@ public class FindFilesByWord extends Application
 
 		mnHelp.getItems().addAll(miAbout);
 
-		mnHelp.setOnAction(e -> {
+		mnHelp.setOnAction(e ->
+		{
 			Alert alHelp = new Alert(Alert.AlertType.INFORMATION);
 			alHelp.setContentText("Program for Displaying Menus");
 			alHelp.setHeaderText("Author: Carter Walsh");
@@ -658,9 +657,9 @@ public class FindFilesByWord extends Application
 			alHelp.showAndWait();
 		});
 		mList.add(mnHelp);
-		mnHelp.getStyleClass().add("menuStyle.css");
 		return mnHelp;
 	}
+
 	public static void main(String[] args)
 	{
 		Application.launch(args);
