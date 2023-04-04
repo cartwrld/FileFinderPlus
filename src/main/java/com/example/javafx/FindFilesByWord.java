@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -16,7 +17,6 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
 import javafx.scene.text.*;
 import javafx.scene.Scene;
 import javafx.stage.*;
@@ -31,24 +31,26 @@ public class FindFilesByWord extends Application
 	private Button cmdBrowse, cmdSearch, cmdClear;
 	private ComboBox<String> cbo;
 	private File[] baseFiles;
-	private File[] foundFiles;
+//	private File[] foundFiles;
 	private ScrollPane spFiles;
 	private HBox dispImgHB;
 	private ListView<String> lvFiles;
 	private ImageView wpIV;
 	private Image wp;
 	private Image[] wpArr;
-	private List<SearchFile> sfList;
+	private List<SearchCriteria> scList;
 	private TextArea selFileTA;
 	private HBox dispSFLTA;
 	private VBox centerBox;
 	private List<Menu> mList;
+	private List<File> ffList;
+	private List<String> fnList;
 
 
 	@Override
 	public void start(Stage stage)
 	{
-		sfList = new ArrayList<>();
+		scList = new ArrayList<>();
 		bp = new BorderPane();
 
 
@@ -99,57 +101,82 @@ public class FindFilesByWord extends Application
 		return dispImgHB;
 	}
 
-	public void findFiles(SearchFile sf) throws IOException
+	public void findFiles(SearchCriteria sc) throws IOException
 	{
 
-		File dir = new File(sf.getFullPath());    //<-------done
+		File dir = new File(sc.getPath());    //<-------done
 
 		if (!dir.exists())
 		{
 			System.out.println("Doesn't exist");
 		}
 
-		String dirPath = dir.getAbsolutePath();
-		File[] contents = dir.listFiles();
-
-		if (contents == null)
-		{
-			throw new NullPointerException();
-		}
-
+		ffList = new ArrayList<>();
 		//get the found files into the foundFiles array
-		getFoundFiles(contents, sf);
+//		getFoundFiles(contents, sc);
 
+		loopDirFindFiles(dir, sc);
 		//creates the directory with the name of the search term
-		File foundDir = new File(dirPath + String.format("\\~%s~", sf.getSearch()));
+
+		File foundDir = new File(sc.getPath() + "\\" + sc.getFolderName());
 		foundDir.mkdir();
 
-		writeFoundFiles(foundFiles, foundDir, sf);
+		writeFoundFiles(ffList, foundDir, sc);
 
 	}
 
-	public void getFoundFiles(File[] allFiles, SearchFile sf) throws FileNotFoundException
+	/**
+	 * I need to take in a directory
+	 * make sure directory is not null
+	 * for loop to look at each file in the passed-in directory
+	 * if file is not a directory,
+	 * add to fflist
+	 * /
+	 * if file is a directory,
+	 * assert listFiles != null
+	 * for each dir in passed-in directory.listFiles
+	 * recursive call(dir, sc)
+	 */
+	public void loopDirFindFiles(File directory, SearchCriteria sc) throws FileNotFoundException
 	{
-		foundFiles = new File[0];
+		assert directory.listFiles() != null;
 
-		for (File f : allFiles)
+		for (File file : Objects.requireNonNull(directory.listFiles()))
 		{
-			if (f.getName().endsWith(sf.getFileType()))    //<-------done
+			if (file.isFile())
 			{
-				try (Scanner scan = new Scanner(f))
+				scanFilesAddIfMatch(file, sc);
+			}
+			if (file.isDirectory())
+			{
+				for (File f : Objects.requireNonNull(file.listFiles()))
+				{
+					loopDirFindFiles(file, sc);
+				}
+			}
+		}
+
+	}
+
+	public void scanFilesAddIfMatch(File file, SearchCriteria sc) throws FileNotFoundException
+	{
+		if (file.getName().endsWith(sc.getFileType()))    //<-------done
+			{
+				try (Scanner scan = new Scanner(file))
 				{
 					boolean b = false;
 
 					while (scan.hasNextLine())
 					{
-						String str = scan.nextLine();
-						for (String s : sf.getSearch())
+						String searchWord = scan.nextLine();
+						for (String s : sc.getSearch())
 						{
-							b = str.contains(s);
+							b = searchWord.contains(s);
 
 							if (b)
 							{
-								foundFiles = push(foundFiles, f);
+								ffList.add(file);
+//								foundFiles = push(foundFiles, f);
 								break;
 							}
 						}
@@ -161,36 +188,101 @@ public class FindFilesByWord extends Application
 					}
 				}
 			}
-		}
 	}
 
-	public File[] push(File[] array, File file)
-	{
-		File[] retArr = new File[array.length + 1];
 
-		for (int i = 0; i < array.length; i++)
-		{
-			retArr[i] = array[i];
-		}
+//	public void getFoundFiles(File[] allFiles, SearchCriteria sc) throws FileNotFoundException
+//	{
+//
+//		for (File f : allFiles)
+//		{
+//			if (f.getName().endsWith(sc.getFileType()))    //<-------done
+//			{
+//				try (Scanner scan = new Scanner(f))
+//				{
+//					boolean b = false;
+//
+//					while (scan.hasNextLine())
+//					{
+//						String str = scan.nextLine();
+//						for (String s : sc.getSearch())
+//						{
+//							b = str.contains(s);
+//
+//							if (b)
+//							{
+//								ffList.add(f);
+////								foundFiles = push(foundFiles, f);
+//								break;
+//							}
+//						}
+//						if (b)
+//						{
+//							break;
+//						}
+//
+//					}
+//				}
+//			}
+//		}
+//	}
 
-		retArr[array.length] = file;
+//	public File[] push(File[] array, File file)
+//	{
+//		File[] retArr = new File[array.length + 1];
+//
+//		for (int i = 0; i < array.length; i++)
+//		{
+//			retArr[i] = array[i];
+//		}
+//
+//		retArr[array.length] = file;
+//
+//		return retArr;
+//
+//	}
 
-		return retArr;
 
-	}
 
-	public void writeFoundFiles(File[] ff, File d, SearchFile sf) throws IOException
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	public void writeFoundFiles(List<File> ff, File d, SearchCriteria sc) throws IOException
 	{
 		//for each of the files that were previously found
 		for (File f : ff)
 		{
 			//creates new file with the same path name and file type
 
-			String ffName = f.getName().substring(0, f.getName().indexOf(".")) + " - FOUND" + sf.getFileType();
+			String ffName = f.getName().substring(0, f.getName().indexOf(".")) + "-ff" + sc.getFileType();
 
 			File found = new File(d.getAbsolutePath() + "\\" + ffName);
-
-			found.createNewFile();
 
 			//scans the
 			try (Scanner scan = new Scanner(f); PrintWriter pw = new PrintWriter(found))
@@ -214,24 +306,38 @@ public class FindFilesByWord extends Application
 
 		cmdSearch.setOnAction(e ->
 		{
-			String[] criteria = null;
+			SearchCriteria sc = new SearchCriteria(txtSearch.getText(), cbo.getValue(), txtPath.getText());
 
-			if (txtSearch.getText().contains(","))
+			File baseDir = new File(sc.getPath());
+
+			int nc = 0;
+
+			for (int i=0; i<baseDir.listFiles().length; i++)
 			{
-				criteria = txtSearch.getText().split(",");
-			} else
-			{
-				criteria = new String[1];
-				criteria[0] = txtSearch.getText();
+				File[] bd = baseDir.listFiles();
+
+
+					assert bd != null;
+					if (bd[i].getName().equals(String.format("~%s~", sc.getSearchStr())))
+					{
+						nc++;
+					}
+
 			}
 
-			SearchFile sf = new SearchFile(criteria, cbo.getValue(), txtPath.getText());
+			if (nc > 0)
+			{
+				sc.setFolderName(String.format("~%s (%s)~",sc.getSearchStr()));
+			} else {
+				sc.setFolderName(sc.getSearchStr());
+			}
 
-			sfList.add(sf);
+
+			scList.add(sc);
 
 			try
 			{
-				findFiles(sf);
+				findFiles(sc);
 			} catch (IOException ex)
 			{
 				throw new RuntimeException(ex);
@@ -248,7 +354,7 @@ public class FindFilesByWord extends Application
 			{
 				lvFiles = new ListView<>();
 
-				for (File f : foundFiles)
+				for (File f : ffList)
 				{
 					lvFiles.getItems().add(f.getName());
 				}
@@ -281,7 +387,7 @@ public class FindFilesByWord extends Application
 
 						obOpen.setTitle("Open File for Processing");
 
-						String filename = sf.getFullPath() + "/" + lvFiles.getSelectionModel().getSelectedItem();
+						String filename = sc.getPath() + "/" + lvFiles.getSelectionModel().getSelectedItem();
 
 						System.out.println(filename);
 //						obOpen.setInitialDirectory(new File("" + lvFiles.getSelectionModel().selectedItemProperty()));
@@ -344,6 +450,11 @@ public class FindFilesByWord extends Application
 		return centerBox;
 	}
 
+
+	/**
+	 * Search Button
+	 * @return - used in setCenter()
+	 */
 	public HBox getSubBox()
 	{
 		HBox subHB = getHB(20, 10);
